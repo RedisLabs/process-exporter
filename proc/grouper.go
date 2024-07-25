@@ -13,11 +13,13 @@ type (
 	Grouper struct {
 		// groupAccum records the historical accumulation of a group so that
 		// we can avoid ever decreasing the counts we return.
-		groupAccum        map[string]Counts
-		tracker           *Tracker
-		threadAccum       map[string]map[string]Threads
-		debug             bool
-		removeEmptyGroups bool
+		groupAccum         map[string]Counts
+		tracker            *Tracker
+		threadAccum        map[string]map[string]Threads
+		debug              bool
+		removeEmptyGroups  bool
+		customLabelCommand string
+		groupCustomLabel   map[string]string
 	}
 
 	// GroupByName maps group name to group metrics.
@@ -37,11 +39,12 @@ type (
 		Wchans map[string]int
 		Procs  int
 		Memory
-		OldestStartTime time.Time
-		OpenFDs         uint64
-		WorstFDratio    float64
-		NumThreads      uint64
-		Threads         []Threads
+		OldestStartTime  time.Time
+		OpenFDs          uint64
+		WorstFDratio     float64
+		NumThreads       uint64
+		Threads          []Threads
+		CustomLabelValue string
 	}
 )
 
@@ -50,13 +53,15 @@ type (
 func lessThreads(x, y Threads) bool { return seq.Compare(x, y) < 0 }
 
 // NewGrouper creates a grouper.
-func NewGrouper(namer common.MatchNamer, trackChildren, trackThreads, recheck bool, recheckTimeLimit time.Duration, debug bool, removeEmptyGroups bool) *Grouper {
+func NewGrouper(namer common.MatchNamer, trackChildren, trackThreads, recheck bool, recheckTimeLimit time.Duration, debug bool, removeEmptyGroups bool, customLabelCommand string) *Grouper {
 	g := Grouper{
-		groupAccum:        make(map[string]Counts),
-		threadAccum:       make(map[string]map[string]Threads),
-		tracker:           NewTracker(namer, trackChildren, recheck, recheckTimeLimit, debug),
-		debug:             debug,
-		removeEmptyGroups: removeEmptyGroups,
+		groupAccum:         make(map[string]Counts),
+		threadAccum:        make(map[string]map[string]Threads),
+		tracker:            NewTracker(namer, trackChildren, recheck, recheckTimeLimit, debug),
+		debug:              debug,
+		removeEmptyGroups:  removeEmptyGroups,
+		customLabelCommand: customLabelCommand,
+		groupCustomLabel:   make(map[string]string),
 	}
 	return &g
 }
@@ -140,10 +145,21 @@ func (g *Grouper) groups(tracked []Update) GroupByName {
 			if g.removeEmptyGroups {
 				delete(g.groupAccum, gname)
 				delete(g.threadAccum, gname)
+				delete(g.groupCustomLabel, gname)
 			} else {
 				groups[gname] = Group{Counts: gcounts}
 			}
 		}
+	}
+
+	for gname, group := range groups {
+		lableValue, labelValueExists := g.groupCustomLabel[gname]
+		if !labelValueExists {
+			lableValue = g.customLabelCommand
+			g.groupCustomLabel[gname] = lableValue
+		}
+		group.CustomLabelValue = lableValue
+		groups[gname] = group
 	}
 
 	return groups

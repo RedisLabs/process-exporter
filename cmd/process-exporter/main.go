@@ -180,6 +180,7 @@ func main() {
 		showVersion = flag.Bool("version", false,
 			"print version information and exit")
 		removeEmptyGroups = flag.Bool("remove-empty-groups", false, "forget process groups with no processes")
+		customLabel       = flag.String("cutom-lable", "", "A custom label to add to each metric, in the form of <label_name>:<label_command>")
 	)
 	flag.Parse()
 
@@ -250,6 +251,7 @@ func main() {
 			RecheckTimeLimit:  *recheckTimeLimit,
 			Debug:             *debug,
 			RemoveEmptyGroups: *removeEmptyGroups,
+			CustomLabel:       *customLabel,
 		},
 	)
 	if err != nil {
