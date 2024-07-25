@@ -1,6 +1,11 @@
 package proc
 
 import (
+	"fmt"
+	"log"
+	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 
 	seq "github.com/ncabatoff/go-seq/seq"
@@ -18,6 +23,7 @@ type (
 		threadAccum       map[string]map[string]Threads
 		debug             bool
 		removeEmptyGroups bool
+		groupBdbLabel     map[string]string
 	}
 
 	// GroupByName maps group name to group metrics.
@@ -42,6 +48,7 @@ type (
 		WorstFDratio    float64
 		NumThreads      uint64
 		Threads         []Threads
+		BdbLabel        string
 	}
 )
 
@@ -57,6 +64,7 @@ func NewGrouper(namer common.MatchNamer, trackChildren, trackThreads, recheck bo
 		tracker:           NewTracker(namer, trackChildren, recheck, recheckTimeLimit, debug),
 		debug:             debug,
 		removeEmptyGroups: removeEmptyGroups,
+		groupBdbLabel:     make(map[string]string),
 	}
 	return &g
 }
@@ -140,13 +148,43 @@ func (g *Grouper) groups(tracked []Update) GroupByName {
 			if g.removeEmptyGroups {
 				delete(g.groupAccum, gname)
 				delete(g.threadAccum, gname)
+				delete(g.groupBdbLabel, gname)
 			} else {
 				groups[gname] = Group{Counts: gcounts}
 			}
 		}
 	}
 
+	for gname, group := range groups {
+		lableValue, labelValueExists := g.groupBdbLabel[gname]
+		if !labelValueExists {
+			lableValue = get_bdb_label(gname)
+			g.groupBdbLabel[gname] = lableValue
+		}
+		group.BdbLabel = lableValue
+		groups[gname] = group
+	}
+
 	return groups
+}
+
+func get_bdb_label(groupname string) string {
+	re := regexp.MustCompile(`redis-(\d+)`)
+	matches := re.FindStringSubmatch(groupname)
+
+	// Check if a match was found
+	if len(matches) < 2 {
+		return "None"
+	}
+
+	shard_uid := matches[1]
+	out, err := exec.Command("ccs-cli", "hget", fmt.Sprintf("redis:%s", shard_uid), "bdb_uid").Output()
+	if err != nil {
+		log.Fatal(err)
+		return "Error"
+	}
+
+	return strings.TrimSuffix(string(out[:]), "\n")
 }
 
 func (g *Grouper) threads(gname string, tracked []ThreadUpdate) []Threads {

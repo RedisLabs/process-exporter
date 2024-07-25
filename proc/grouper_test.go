@@ -52,9 +52,9 @@ func TestGrouperBasic(t *testing.T) {
 			},
 			GroupByName{
 				"g1": Group{Counts{}, States{Other: 1}, msi{}, 1, Memory{7, 8, 0, 0, 0}, starttime,
-					4, 0.01, 2, nil},
+					4, 0.01, 2, nil, "None"},
 				"g2": Group{Counts{}, States{Waiting: 1}, msi{}, 1, Memory{8, 9, 0, 0, 0}, starttime,
-					40, 0.1, 3, nil},
+					40, 0.1, 3, nil, "None"},
 			},
 		},
 		{
@@ -66,9 +66,9 @@ func TestGrouperBasic(t *testing.T) {
 			},
 			GroupByName{
 				"g1": Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{Zombie: 1}, msi{}, 1,
-					Memory{6, 7, 0, 0, 0}, starttime, 100, 0.25, 4, nil},
+					Memory{6, 7, 0, 0, 0}, starttime, 100, 0.25, 4, nil, "None"},
 				"g2": Group{Counts{2, 2, 2, 2, 2, 2, 0, 0}, States{Running: 1}, msi{}, 1,
-					Memory{9, 8, 0, 0, 0}, starttime, 400, 1, 2, nil},
+					Memory{9, 8, 0, 0, 0}, starttime, 400, 1, 2, nil, "None"},
 			},
 		},
 	}
@@ -98,7 +98,7 @@ func TestGrouperProcJoin(t *testing.T) {
 				piinfo(p1, n1, Counts{1, 2, 3, 4, 5, 6, 0, 0}, Memory{3, 4, 0, 0, 0}, Filedesc{4, 400}, 2),
 			},
 			GroupByName{
-				"g1": Group{Counts{}, States{}, msi{}, 1, Memory{3, 4, 0, 0, 0}, starttime, 4, 0.01, 2, nil},
+				"g1": Group{Counts{}, States{}, msi{}, 1, Memory{3, 4, 0, 0, 0}, starttime, 4, 0.01, 2, nil, "None"},
 			},
 		}, {
 			// The counts for pid2 won't be factored into the total yet because we only add
@@ -112,7 +112,7 @@ func TestGrouperProcJoin(t *testing.T) {
 			},
 			GroupByName{
 				"g1": Group{Counts{2, 2, 2, 2, 2, 2, 0, 0}, States{Running: 1, Sleeping: 1}, msi{}, 2,
-					Memory{4, 6, 0, 0, 0}, starttime, 44, 0.1, 5, nil},
+					Memory{4, 6, 0, 0, 0}, starttime, 44, 0.1, 5, nil, "None"},
 			},
 		}, {
 			[]IDInfo{
@@ -123,7 +123,7 @@ func TestGrouperProcJoin(t *testing.T) {
 			},
 			GroupByName{
 				"g1": Group{Counts{4, 4, 4, 4, 4, 4, 0, 0}, States{Running: 2}, msi{}, 2,
-					Memory{3, 9, 0, 0, 0}, starttime, 44, 0.1, 5, nil},
+					Memory{3, 9, 0, 0, 0}, starttime, 44, 0.1, 5, nil, "None"},
 			},
 		},
 	}
@@ -154,19 +154,19 @@ func TestGrouperNonDecreasing(t *testing.T) {
 				piinfo(p2, n2, Counts{1, 1, 1, 1, 1, 1, 0, 0}, Memory{1, 2, 0, 0, 0}, Filedesc{40, 400}, 3),
 			},
 			GroupByName{
-				"g1": Group{Counts{}, States{}, msi{}, 2, Memory{4, 6, 0, 0, 0}, starttime, 44, 0.1, 5, nil},
+				"g1": Group{Counts{}, States{}, msi{}, 2, Memory{4, 6, 0, 0, 0}, starttime, 44, 0.1, 5, nil, "None"},
 			},
 		}, {
 			[]IDInfo{
 				piinfo(p1, n1, Counts{4, 5, 6, 7, 8, 9, 0, 0}, Memory{1, 5, 0, 0, 0}, Filedesc{4, 400}, 2),
 			},
 			GroupByName{
-				"g1": Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, msi{}, 1, Memory{1, 5, 0, 0, 0}, starttime, 4, 0.01, 2, nil},
+				"g1": Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, msi{}, 1, Memory{1, 5, 0, 0, 0}, starttime, 4, 0.01, 2, nil, "None"},
 			},
 		}, {
 			[]IDInfo{},
 			GroupByName{
-				"g1": Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, nil, 0, Memory{}, time.Time{}, 0, 0, 0, nil},
+				"g1": Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, nil, 0, Memory{}, time.Time{}, 0, 0, 0, nil, "None"},
 			},
 		},
 	}
@@ -197,15 +197,15 @@ func TestGrouperRemoveEmptyGroups(t *testing.T) {
 				piinfo(p2, n2, Counts{1, 1, 1, 1, 1, 1, 0, 0}, Memory{1, 2, 0, 0, 0}, Filedesc{40, 400}, 3),
 			},
 			GroupByName{
-				n1: Group{Counts{}, States{}, msi{}, 1, Memory{3, 4, 0, 0, 0}, starttime, 4, 0.01, 2, nil},
-				n2: Group{Counts{}, States{}, msi{}, 1, Memory{1, 2, 0, 0, 0}, starttime, 40, 0.1, 3, nil},
+				n1: Group{Counts{}, States{}, msi{}, 1, Memory{3, 4, 0, 0, 0}, starttime, 4, 0.01, 2, nil, "None"},
+				n2: Group{Counts{}, States{}, msi{}, 1, Memory{1, 2, 0, 0, 0}, starttime, 40, 0.1, 3, nil, "None"},
 			},
 		}, {
 			[]IDInfo{
 				piinfo(p1, n1, Counts{4, 5, 6, 7, 8, 9, 0, 0}, Memory{1, 5, 0, 0, 0}, Filedesc{4, 400}, 2),
 			},
 			GroupByName{
-				n1: Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, msi{}, 1, Memory{1, 5, 0, 0, 0}, starttime, 4, 0.01, 2, nil},
+				n1: Group{Counts{1, 1, 1, 1, 1, 1, 0, 0}, States{}, msi{}, 1, Memory{1, 5, 0, 0, 0}, starttime, 4, 0.01, 2, nil, "None"},
 			},
 		}, {
 			[]IDInfo{},
@@ -238,7 +238,7 @@ func TestGrouperThreads(t *testing.T) {
 				"g1": Group{Counts{}, States{}, msi{}, 1, Memory{}, tm, 1, 1, 2, []Threads{
 					Threads{"t1", 1, Counts{}},
 					Threads{"t2", 1, Counts{}},
-				}},
+				}, "None"},
 			},
 		}, {
 			piinfot(p, n, Counts{}, Memory{}, Filedesc{1, 1}, []Thread{
@@ -250,7 +250,7 @@ func TestGrouperThreads(t *testing.T) {
 				"g1": Group{Counts{}, States{}, msi{}, 1, Memory{}, tm, 1, 1, 3, []Threads{
 					Threads{"t1", 1, Counts{1, 1, 1, 1, 1, 1, 0, 0}},
 					Threads{"t2", 2, Counts{1, 1, 1, 1, 1, 1, 0, 0}},
-				}},
+				}, "None"},
 			},
 		}, {
 			piinfot(p, n, Counts{}, Memory{}, Filedesc{1, 1}, []Thread{
@@ -260,7 +260,7 @@ func TestGrouperThreads(t *testing.T) {
 			GroupByName{
 				"g1": Group{Counts{}, States{}, msi{}, 1, Memory{}, tm, 1, 1, 2, []Threads{
 					Threads{"t2", 2, Counts{4, 5, 6, 7, 8, 9, 0, 0}},
-				}},
+				}, "None"},
 			},
 		},
 	}
