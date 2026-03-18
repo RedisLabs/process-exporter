@@ -7,6 +7,7 @@ import (
 )
 
 // Hook up gocheck into the "go test" runner.
+// test comment
 func Test(t *testing.T) { TestingT(t) }
 
 type MySuite struct{}
