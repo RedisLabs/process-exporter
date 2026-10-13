@@ -272,8 +272,6 @@ func main() {
 		// We throw away the first result because that first collection primes the pump, and
 		// otherwise we won't see our counter metrics.  This is specific to the implementation
 		// of NamedProcessCollector.Collect().
-		// The fake scraper uses DefaultGatherer; collect from the exporter registry.
-		prometheus.DefaultGatherer = registry
 		fscraper := fakescraper.NewFakeScraper()
 		fscraper.Scrape()
 		time.Sleep(*onceToStdoutDelay)
